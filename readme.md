@@ -1,5 +1,50 @@
 # Flask Api for Social Media (Foodie)
 
+This API is being created to be consumed by Foodie, a personal React-Native project.
+
+This project uses Flask for the server, Pymongo for the db integration, jwt for authentication purposes, MongoAtlas for cloud hosting of the db, and Cloudinary to store multimedia content.
+
+**_Getting started_**
+
+First clone the repository into your desired location. Then you need to create a Virtual Enviroment, to do so use:
+
+```
+# Install virtualenv
+pip install virtualenv
+
+# Create a new virtual enviroment
+virtualenv -p python3 venv
+
+# To start the virtual enviroment Linux & Mac
+source ./venv/bin/activate
+```
+
+Afterwards you need to install flask and its dependancies
+
+```
+# Install flask
+pip install requirements.txt
+
+# Start flask
+python3 src/app.py
+```
+
+Then you need to create a **.env** file to store your mongo connection string and Cloudinary set up
+
+```
+touch .env
+```
+
+Inside your .env file you need to declare first and foremost the MONGO_URI, which you can get from mongodb.com using their cloudstorage service. You can find a guide on how to create a mongo cluster and get the Connection string in [here](https://studio3t.com/knowledge-base/articles/connect-to-mongodb-atlas/)
+
+Your .env file should end up looking something like:
+
+```
+MONGO_URI=your_mongo_connection_string
+```
+
+This api should be easy to customize considering that Mongodb models are not forced upon the database nor server. Which means that you can change them as the project develops or as needs surges.
+
 ## Db Models
 
 > Since we use MongoDb this models just work as a guide
