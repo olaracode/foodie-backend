@@ -38,4 +38,155 @@
 - saved = _Integer(Incremental)_
 - sent = _Integer(Incremental)_
 
-## Endpoints
+<br/>
+
+# Endpoints
+
+## Users
+
+<br/>
+
+Get user by _id_ **/user/{ id }**
+
+```
+Method: Get
+
+Params:
+- id: User id
+
+Return:
+- { user }
+```
+
+<br/>
+
+Create a new User **/users/new**
+
+```
+Method: Post
+
+Request:
+- username
+- name
+- password
+- password_confirm
+- email
+- gender
+- location
+
+Return:
+- Response = {username, email}
+```
+
+<br/>
+
+Get users **/users**
+
+```
+Method: Get
+
+Return:
+- Response = { [users] }
+```
+
+<br/>
+
+Get followed **/user/{ id }/followed**
+
+```
+Method: Get
+
+Params:
+- id: User_id
+
+Return:
+- Response = { [users_followed] }
+```
+
+<br/>
+
+Get followers **/user/{ id }**
+
+```
+Method: Get
+
+Params:
+- id: User_id
+
+Return:
+- Response = { [followers] }
+```
+
+<br/>
+
+Follow user **/user/{ id }/follow**
+
+```
+Method: Post
+
+Params:
+- id: User_id
+
+Request:
+- user_to_follow = _id
+
+Return:
+- Response = { Message }
+```
+
+<br/>
+
+Unfollow user **/user/{ id }/follow**
+
+```
+Method: Post
+
+Params:
+- id: User_id
+
+Request:
+- user_to_unfollow = _id
+
+Return:
+- Response = { Message }
+```
+
+## Posts
+
+<br>
+
+Get user posts **/posts/{ id }/**
+
+```
+Method: Get
+
+Params:
+- id: user_id
+
+Returns:
+- { [user_posts] }
+```
+
+<br/>
+
+Create new post **/post/{ id }/new**
+
+```
+Method: Post
+
+Params:
+- id: User_id
+
+Request:
+- user
+- title
+- img
+- ingredients
+- preparation
+- time
+- servings
+- categories
+
+Return:
+- Response = { Message }
+```

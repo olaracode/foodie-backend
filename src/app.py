@@ -59,7 +59,7 @@ def like_post(id):
 
 
 # Get following list
-@app.route('/user/<id>/following', methods=['GET'])
+@app.route('/user/<id>/followed', methods=['GET'])
 def following(id):
     response, status = get_following(id, Users)
     return jsonify(response), status
