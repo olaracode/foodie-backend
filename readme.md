@@ -85,9 +85,9 @@ This api should be easy to customize considering that Mongodb models are not for
 
 <br/>
 
-# Endpoints
+## Endpoints
 
-## Users
+### Users
 
 <br/>
 
@@ -196,7 +196,7 @@ Return:
 - Response = { Message }
 ```
 
-## Posts
+### Posts
 
 <br>
 
