@@ -2,8 +2,7 @@ from flask_pymongo import ObjectId
 from flask import request
 
 
-def create_post(Posts, Users, id):
-    user = Users.find_one({"_id": ObjectId(id)})
+def create_post(Posts, Users, user):
     title = request.json["title"]
     img = "img_url"
     ingredients = request.json["ingredients"]

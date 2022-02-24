@@ -76,9 +76,12 @@ def get_following(id, Users):
     user = Users.find_one({"_id": ObjectId(id)})
     following = user["following"]
     following_list = []
+
     if len(following) == 0:
-        return {"Msg": "Not following any users"}
+        return {"Msg": "Not following any users"}, 404
+
     for followed in following:
+        print(followed)
         follwd = Users.find_one({"_id": ObjectId(followed)})
         followed_user = {
             "username": follwd["username"],
@@ -86,6 +89,7 @@ def get_following(id, Users):
             # "profile": user["profile"]
         }
         following_list.append(followed_user)
+
     return following_list, 200
 
 
@@ -97,7 +101,7 @@ def get_followers(id, Users):
 
     # Check if the user has any followers
     if len(followers) == 0:
-        return {"Msg": "No user is following you"}
+        return {"Msg": "No user is following you"}, 404
 
     # Parse thru followers to create a object-like variable and append it to follower_list
     for follower in followers:
@@ -112,10 +116,9 @@ def get_followers(id, Users):
 
 
 # Follow
-def follow_user(id, Users):
-    user = Users.find_one({'_id': ObjectId(id)})
+def follow_user(Users, user, id_to_follow):
     user_to_follow = Users.find_one(
-        {'_id': ObjectId(request.json['user_to_follow'])})
+        {'_id': ObjectId(id_to_follow)})
 
     # Add the user_to_follow to the current user
     following = user['following']
@@ -131,21 +134,23 @@ def follow_user(id, Users):
     followers.append(str(user["_id"]))
 
     # Updating in database
-    Users.update_one({'_id': ObjectId(id)}, {
+    Users.update_one({'_id': user["_id"]}, {
         '$set': {'following': following}
     })
 
-    Users.update_one({'_id': ObjectId(request.json['user_to_follow'])}, {
+    Users.update_one({'_id': user_to_follow["_id"]}, {
         '$set': {'followers': followers}
     })
     return {'Msg': "User followed successfully"}, 200
 
 
 # Unfollow
-def unfollow_user(id, Users):
-    user = Users.find_one({'_id': ObjectId(id)})
+def unfollow_user(Users, user, id_to_unfollow):
     user_to_unfollow = Users.find_one(
-        {'_id': ObjectId(request.json['user_to_unfollow'])})
+        {'_id': ObjectId(id_to_unfollow)})
+
+    if user_to_unfollow not in user["following"]:
+        return {"Msg": "Not following any user"}, 404
 
     # remove the user_to_unfollow from following list
     following = user['following']
@@ -153,10 +158,10 @@ def unfollow_user(id, Users):
 
     # remove self from user_to_unfollow followers list
     followers = user_to_unfollow["followers"]
-    followers.remove[str(user["_id"])]
+    followers.remove(str(user["_id"]))
 
     # Update Database
-    Users.update_one({'_id': ObjectId(id)}, {'$set': {'following': following}})
+    Users.update_one({'_id': user["_id"]}, {'$set': {'following': following}})
 
     Users.update_one({'_id': user_to_unfollow["_id"]}, {
                      '$set': {"followers": followers}})

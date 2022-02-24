@@ -20,11 +20,9 @@ mongo = PyMongo(app)
 db = mongo.db
 Users = db.users
 Posts = db.posts
-# < --- USER ROUTES --- >
+
 
 # Authentication Middleware
-
-
 def auth_middleware(func):
     @wraps(func)
     def decorador(*args, **kwargs):
@@ -44,6 +42,9 @@ def auth_middleware(func):
     return decorador
 
 
+# < --- USER ROUTES --- >
+
+
 # Create new user
 @app.route('/users/new', methods=['POST'])
 def create_new_user():
@@ -59,9 +60,17 @@ def get_all_users():
 
 
 # Get user By id
-@app.route('/user/<id>', methods=['GET'])
-def get_user(id):
-    user = Users.find_one({'_id': ObjectId(id)})
+# @app.route('/user/<id>', methods=['GET'])
+# def get_user(id):
+#     user = Users.find_one({'_id': ObjectId(id)})
+#     user["_id"] = str(user["_id"])
+#     return jsonify(user)
+
+
+# Get user by username
+@app.route('/user/<username>', methods=['get'])
+def get_user_username(username):
+    user = Users.find_one({'username': username})
     user["_id"] = str(user["_id"])
     return jsonify(user)
 
@@ -101,26 +110,29 @@ def followers(id):
     return jsonify(response), status
 
 
-# Follow
-@app.route('/user/follow', methods=['POST'])
+# Follow. param id refers to the USER TO FOLLOW ID
+@app.route('/user/follow/<id>', methods=['POST'])
 @auth_middleware
-def follow(user_auth):
-    response, status = follow_user(user_auth["_id"], Users)
+def follow(user_auth, id):
+    response, status = follow_user(Users, user_auth, id)
     return response, status
 
 
-# Unfollow
-@app.route('/user/<id>/unfollow', methods=['POST'])
-def unfollow(id):
-    unfollow_user(id, Users)
+# Unfollow. param id refers to USER TO UNFOLLOW ID
+@app.route('/user/unfollow/<id>', methods=['POST'])
+@auth_middleware
+def unfollow(user_auth, id):
+    response, status = unfollow_user(Users, user_auth, id)
+    return response, status
 
 
 # < --- POST ROUTES --- >
 
 # Create new post
-@app.route('/post/<id>/new', methods=["POST"])
-def post(id):
-    response = create_post(Posts, Users, id)
+@app.route('/post/new', methods=["POST"])
+@auth_middleware
+def post(user_auth):
+    response = create_post(Posts, Users, user_auth)
     return jsonify(response)
 
 
