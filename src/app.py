@@ -1,25 +1,47 @@
+import jwt
 import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo, ObjectId
 from itsdangerous import json
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 # from utils import generate_random_user
-from users import get_users, create_user, add_like_post, get_following, get_followers, follow_user, unfollow_user
-from post import create_post, get_user_posts
-
+# LOCAL IMPORTS
+from users import get_users, create_user, add_like_post, get_following, get_followers, follow_user, log_user, unfollow_user
+from post import create_post, get_post, get_user_posts
 
 app = Flask(__name__)
 
 load_dotenv()
 
-print(os.getenv("MONGO_URI"))
 app.config['MONGO_URI'] = "{uri}".format(uri=os.environ.get("MONGO_URI"))
 mongo = PyMongo(app)
 db = mongo.db
 Users = db.users
 Posts = db.posts
 # < --- USER ROUTES --- >
+
+# Authentication Middleware
+
+
+def auth_middleware(func):
+    @wraps(func)
+    def decorador(*args, **kwargs):
+        token = None
+
+        if 'auth_token' in request.headers:
+            token = request.headers['auth_token']
+        if not token:
+            return jsonify({'Msg': 'A valid auth-token is required'})
+        try:
+            data = jwt.decode(token, options={"verify_signature": False})
+            user_auth = Users.find_one(
+                {"_id": ObjectId(data['id'])})
+        except:
+            return jsonify({'mensaje': 'Token invalido'})
+        return func(user_auth, *args,  **kwargs)
+    return decorador
 
 
 # Create new user
@@ -42,6 +64,13 @@ def get_user(id):
     user = Users.find_one({'_id': ObjectId(id)})
     user["_id"] = str(user["_id"])
     return jsonify(user)
+
+
+# Login
+@app.route('/user/login', methods=["POST"])
+def login():
+    response = log_user(Users)
+    return response
 
 
 # Update user description
@@ -73,9 +102,10 @@ def followers(id):
 
 
 # Follow
-@app.route('/user/<id>/follow', methods=['POST'])
-def follow(id):
-    response, status = follow_user(id, Users)
+@app.route('/user/follow', methods=['POST'])
+@auth_middleware
+def follow(user_auth):
+    response, status = follow_user(user_auth["_id"], Users)
     return response, status
 
 
@@ -86,15 +116,25 @@ def unfollow(id):
 
 
 # < --- POST ROUTES --- >
+
+# Create new post
 @app.route('/post/<id>/new', methods=["POST"])
 def post(id):
     response = create_post(Posts, Users, id)
     return jsonify(response)
 
 
+# Get all posts from user_id
 @app.route('/posts/<id>', methods=["GET"])
 def user_posts(id):
     response = get_user_posts(Posts, id)
+    return jsonify(response)
+
+
+# Get post by id
+@app.route('/post/<id>')
+def get_post_info(id):
+    response = get_post(Posts, id)
     return jsonify(response)
 
 
@@ -124,9 +164,6 @@ def user_posts(id):
 #             "email": new_user["email"]
 #         }
 #         new_users.append(response)
-
 #     return jsonify(new_users), 200
-
-
 if __name__ == "__main__":
     app.run(debug=True)

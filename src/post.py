@@ -43,9 +43,19 @@ def get_user_posts(Posts, id):
     posts = []
     for post in user_posts:
         posts.append({
+            "_id": str(post["_id"]),
             "title": post["title"],
             "username": post["username"]
         })
     return posts
 
-# def update_post(Posts, id):
+
+def get_post(Posts, id):
+    post = Posts.find_one({"_id": ObjectId(id)})
+    print(post)
+    post["_id"] = str(post["_id"])
+    return post, 200
+
+
+def update_post_categories(Posts, id):
+    pass

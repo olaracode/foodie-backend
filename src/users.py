@@ -1,9 +1,15 @@
+from base64 import encode
+from posix import environ
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_pymongo import ObjectId
 from flask import request
-
+import jwt
+import datetime
+import os
 
 # Create a new user
+
+
 def create_user(Users, request):
     username = request.json["username"]
     name = request.json["name"]
@@ -155,3 +161,17 @@ def unfollow_user(id, Users):
     Users.update_one({'_id': user_to_unfollow["_id"]}, {
                      '$set': {"followers": followers}})
     return {'Msg': 'User unfollowed successfully'}, 200
+
+
+# LOGIN
+def log_user(Users):
+    password = request.json["password"]
+    username = request.json["username"]
+    if password and username:
+        user = Users.find_one({"username": username})
+        if user:
+            if check_password_hash(user["password"], password):
+                token = jwt.encode({'id': str(user["_id"]), "exp": datetime.datetime.now(
+                    datetime.timezone.utc) + datetime.timedelta(minutes=30)}, os.environ.get("SECRET_KEY"), algorithm='HS256')
+                print(token)
+                return token
