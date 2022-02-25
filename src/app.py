@@ -8,8 +8,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 # from utils import generate_random_user
 # LOCAL IMPORTS
-from users import get_users, create_user, add_like_post, get_following, get_followers, follow_user, log_user, unfollow_user
-from post import create_post, get_post, get_user_posts
+from users import get_users, create_user, get_following, get_followers, follow_user, log_user, unfollow_user
+from post import create_post, get_post, get_user_posts, handle_likes
 
 app = Flask(__name__)
 
@@ -68,7 +68,7 @@ def get_all_users():
 
 
 # Get user by username
-@app.route('/user/<username>', methods=['get'])
+@app.route('/user/<username>', methods=['GET'])
 def get_user_username(username):
     user = Users.find_one({'username': username})
     user["_id"] = str(user["_id"])
@@ -90,27 +90,21 @@ def update_description(id):
     return {'Msg': "User description updated successfully"}, 200
 
 
-# Like a post <------ INCOMPLETE
-@app.route('/user/<id>/add/like', methods=['POST'])
-def like_post(id):
-    add_like_post(id, Users)
-
-
-# Get following list
+# Get following list. Params: {id: user_id}
 @app.route('/user/<id>/followed', methods=['GET'])
 def following(id):
     response, status = get_following(id, Users)
     return jsonify(response), status
 
 
-# Get Followers list
+# Get followers list. Params: {id: user_id}
 @app.route('/user/<id>/followers', methods=['GET'])
 def followers(id):
     response, status = get_followers(id, Users)
     return jsonify(response), status
 
 
-# Follow. param id refers to the USER TO FOLLOW ID
+# Follow. Params: {id: user_to_follow_id}
 @app.route('/user/follow/<id>', methods=['POST'])
 @auth_middleware
 def follow(user_auth, id):
@@ -118,7 +112,7 @@ def follow(user_auth, id):
     return response, status
 
 
-# Unfollow. param id refers to USER TO UNFOLLOW ID
+# Unfollow. Params: {id: user_to_unfollow_id}
 @app.route('/user/unfollow/<id>', methods=['POST'])
 @auth_middleware
 def unfollow(user_auth, id):
@@ -136,7 +130,7 @@ def post(user_auth):
     return jsonify(response)
 
 
-# Get all posts from user_id
+# Get all posts from user. Params: {id: user_id}
 @app.route('/posts/<id>', methods=["GET"])
 def user_posts(id):
     response = get_user_posts(Posts, id)
@@ -144,10 +138,26 @@ def user_posts(id):
 
 
 # Get post by id
-@app.route('/post/<id>')
+@app.route('/post/<id>', methods=["GET"])
 def get_post_info(id):
     response = get_post(Posts, id)
     return jsonify(response)
+
+
+# Like a post. Params: {id: post_id}
+@app.route('/post/like/<id>', methods=["POST"])
+@auth_middleware
+def like_post(auth_user, id):
+    response, status = handle_likes(Posts, Users, auth_user, id, "like")
+    return response, status
+
+
+# Dislike a post. Params: {id: post_id}
+@app.route('/post/dislike/<id>', methods=["POST"])
+@auth_middleware
+def dislike_post(auth_user, id):
+    response, status = handle_likes(Posts, Users, auth_user, id, "dislike")
+    return response, status
 
 
 # POPULATE DATABASE ¡------ Caution ------!

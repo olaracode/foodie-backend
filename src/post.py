@@ -41,19 +41,40 @@ def get_user_posts(Posts, id):
     user_posts = Posts.find({"user_id": id})
     posts = []
     for post in user_posts:
-        posts.append({
-            "_id": str(post["_id"]),
-            "title": post["title"],
-            "username": post["username"]
-        })
+        post["_id"] = str(post["_id"])
+        posts.append(post)
     return posts
 
 
 def get_post(Posts, id):
     post = Posts.find_one({"_id": ObjectId(id)})
-    print(post)
     post["_id"] = str(post["_id"])
     return post, 200
+
+
+# Handle the like and dislike feature within the same function
+def handle_likes(Posts, Users, user, id, action):
+    # Define the variables to use
+    post = Posts.find_one({"_id": ObjectId(id)})
+    post_likes = post["likes"]
+    user_likes = user["liked"]
+
+    # Check if it is a like call or a dislike call. action should be a string
+    if action == "like":
+        if str(user["_id"]) in post_likes:
+            return {"Msg": "Post has already been liked"}
+        post_likes.append(str(user["_id"]))
+        user_likes.append(str(post["_id"]))
+    else:
+        if str(user["_id"]) not in post_likes:
+            return {"Msg": "You cannot dislike a post that hasn't been liked"}
+        post_likes.remove(str(user["_id"]))
+        user_likes.remove(str(post["_id"]))
+
+    Posts.update_one({"_id": post["_id"]}, {"$set": {"likes": post_likes}})
+    Users.update_one({"_id": user["_id"]}, {"$set": {"liked": user_likes}})
+
+    return {"Msg": "Post {action} successfully".format(action=action)}, 200
 
 
 def update_post_categories(Posts, id):
