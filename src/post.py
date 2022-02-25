@@ -53,23 +53,22 @@ def get_post(Posts, id):
 
 
 # Handle the like and dislike feature within the same function
-def handle_likes(Posts, Users, user, id, action):
+def handle_likes(Posts, Users, user, id):
     # Define the variables to use
     post = Posts.find_one({"_id": ObjectId(id)})
     post_likes = post["likes"]
     user_likes = user["liked"]
+    action = ""
 
-    # Check if it is a like call or a dislike call. action should be a string
-    if action == "like":
-        if str(user["_id"]) in post_likes:
-            return {"Msg": "Post has already been liked"}, 302
-        post_likes.append(str(user["_id"]))
-        user_likes.append(str(post["_id"]))
-    else:
-        if str(user["_id"]) not in post_likes:
-            return {"Msg": "You cannot dislike a post that hasn't been liked"}, 302
+    # Check if the user has already liked the post
+    if str(user["_id"]) in post_likes:
+        action = "Disliked"
         post_likes.remove(str(user["_id"]))
         user_likes.remove(str(post["_id"]))
+    else:
+        action = "Liked"
+        post_likes.append(str(user["_id"]))
+        user_likes.append(str(post["_id"]))
 
     Posts.update_one({"_id": post["_id"]}, {"$set": {"likes": post_likes}})
     Users.update_one({"_id": user["_id"]}, {"$set": {"liked": user_likes}})
@@ -77,27 +76,25 @@ def handle_likes(Posts, Users, user, id, action):
     return {"Msg": "Post {action} successfully".format(action=action)}, 200
 
 
-def handle_save(Posts, Users, user, id, action):
+def handle_save(Posts, Users, user, id):
     post = Posts.find_one({"_id": ObjectId(id)})
     saved = user["saved"]
-
+    action = ""
     # Check the action to define how to treat the data. Either Append the new items or remove
-    if action == "save":
-        if str(post["_id"]) in saved:
-            return {"Msg": "Post has already been saved"}, 302
-        post["saved"] += 1
-        saved.append(str(post["_id"]))
-    else:
-        if str(post["_id"]) not in saved:
-            return {"Msg": "Can't remove a post that hasn't been liked"}, 302
+    if str(post["_id"]) in saved:
+        action = "Removed"
         post["saved"] -= 1
         saved.remove(str(post["_id"]))
+    else:
+        action = "Saved"
+        post["saved"] += 1
+        saved.append(str(post["_id"]))
 
     # Update database
     Posts.update_one({"_id": post["_id"]}, {"$set": {"saved": post["saved"]}})
     Users.update_one({"_id": user["_id"]}, {"$set": {"saved": saved}})
 
-    return {"Msg": "Post has been saved successfully"}, 200
+    return {"Msg": "Post has been {action} successfully".format(action=action)}, 200
 
 
 def update_post_categories(Posts, id):
