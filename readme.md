@@ -91,13 +91,13 @@ This api should be easy to customize considering that Mongodb models are not for
 
 <br/>
 
-Get user by _id_ **/user/{ id }**
+Get user by username **/user/{ username }**
 
 ```
 Method: Get
 
 Params:
-- id: User id
+- username
 
 Return:
 - { user }
@@ -136,13 +136,13 @@ Return:
 
 <br/>
 
-Get followed **/user/{ id }/followed**
+Get followed **/user/followed/{ id }**
 
 ```
 Method: Get
 
 Params:
-- id: User_id
+- id: User ID
 
 Return:
 - Response = { [users_followed] }
@@ -150,13 +150,13 @@ Return:
 
 <br/>
 
-Get followers **/user/{ id }**
+Get followers **/user/followers/{ id }**
 
 ```
 Method: Get
 
 Params:
-- id: User_id
+- id: User ID
 
 Return:
 - Response = { [followers] }
@@ -164,16 +164,16 @@ Return:
 
 <br/>
 
-Follow user **/user/{ id }/follow**
+Follow user **/user/follow/{ id }**
 
 ```
 Method: Post
 
-Params:
-- id: User_id
+Headers:
+- user_auth: jwt_token
 
-Request:
-- user_to_follow = _id
+Params:
+- id: User to follow ID
 
 Return:
 - Response = { Message }
@@ -181,16 +181,16 @@ Return:
 
 <br/>
 
-Unfollow user **/user/{ id }/follow**
+Unfollow user **/user/follow/{ id }**
 
 ```
 Method: Post
 
-Params:
-- id: User_id
+Headers:
+- user_auth: jwt_token
 
-Request:
-- user_to_unfollow = _id
+Params:
+- id: User to unfollow ID
 
 Return:
 - Response = { Message }
@@ -214,13 +214,13 @@ Returns:
 
 <br/>
 
-Create new post **/post/{ id }/new**
+Create new post **/post/new**
 
 ```
 Method: Post
 
-Params:
-- id: User_id
+Headers:
+- user_auth: jwt_token
 
 Request:
 - user
@@ -231,6 +231,40 @@ Request:
 - time
 - servings
 - categories
+
+Return:
+- Response = { Message }
+```
+
+<br/>
+
+Like post **/post/like/{ id }**
+
+```
+Method: Post
+
+Params:
+- id: Post ID
+
+Headers:
+- user_auth: jwt_token
+
+Return:
+- Response = { Message }
+```
+
+<br/>
+
+Disike post **/post/dislike/{ id }**
+
+```
+Method: Post
+
+Params:
+- id: Post ID
+
+Headers:
+- user_auth: jwt_token
 
 Return:
 - Response = { Message }
