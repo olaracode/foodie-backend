@@ -67,13 +67,11 @@ This api should be easy to customize considering that Mongodb models are not for
 
 **Posts**
 
-> Saved and Sent are set as incremental integers to protect user data
-
 - user-id = _ObjectId_
 - username = _String_
 - title = _String_
 - img = _String(url)_
-- ingredients = _String_
+- ingredients = _Array[Strings]_
 - preparation = _Text_
 - time = _String_
 - servings = _String_
@@ -82,6 +80,8 @@ This api should be easy to customize considering that Mongodb models are not for
 - likes = _Array[id's]_
 - saved = _Integer(Incremental)_
 - sent = _Integer(Incremental)_
+
+> Saved and Sent are set as incremental integers to protect user data
 
 <br/>
 
@@ -265,6 +265,31 @@ Params:
 
 Headers:
 - user_auth: jwt_token
+
+Return:
+- Response = { Message }
+```
+
+<br/>
+
+Update a post **/post/update/{ id }**
+
+```
+Method: PUT
+
+Params:
+- id: Post ID
+
+Headers:
+- user_auth: jwt_token
+
+Request:
+- Title
+- Preparation
+- Ingredients
+- Categories
+- Servings
+- Time
 
 Return:
 - Response = { Message }

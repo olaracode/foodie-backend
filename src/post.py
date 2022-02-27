@@ -97,5 +97,14 @@ def handle_save(Posts, Users, user, id):
     return {"Msg": "Post has been {action} successfully".format(action=action)}, 200
 
 
-def update_post_categories(Posts, id):
-    pass
+def update_post(Posts, id):
+    post_to_update = Posts.find_one({"_id": ObjectId(id)})
+    updates = {}
+    if len(request.json) == 0:
+        return {"Err": "You must past at least one field in the request"}, 304
+    for field in request.json:
+        if len(request.json[field]) != 0:
+            updates[field] = request.json[field]
+
+    Posts.update_one({"_id": ObjectId(id)}, {"$set": updates})
+    return {"Msg": "Post has been updated successfully"}, 200

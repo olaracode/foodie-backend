@@ -180,3 +180,4 @@ def log_user(Users):
                     datetime.timezone.utc) + datetime.timedelta(minutes=30)}, os.environ.get("SECRET_KEY"), algorithm='HS256')
                 print(token)
                 return token
+    return {"Msg": "All fields required for auth"}, 304

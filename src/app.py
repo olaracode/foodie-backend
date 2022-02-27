@@ -9,7 +9,7 @@ from functools import wraps
 # from utils import generate_random_user
 # LOCAL IMPORTS
 from users import get_users, create_user, get_following, get_followers, follow_user, log_user, unfollow_user
-from post import create_post, get_post, get_user_posts, handle_likes, handle_save
+from post import create_post, get_post, get_user_posts, handle_likes, handle_save, update_post
 
 app = Flask(__name__)
 
@@ -153,10 +153,19 @@ def like_post(auth_user, id):
     return response, status
 
 
+# Like a post. Params: {id: post_id}
+# Function handles like and dislike
 @app.route('/post/save/<id>', methods=['POST'])
 @auth_middleware
 def save_post(auth_user, id):
     response, status = handle_save(Posts, Users, auth_user, id)
+    return response, status
+
+
+@app.route('/post/update/<id>', methods=['PUT'])
+@auth_middleware
+def update(auth_user, id):
+    response, status = update_post(Posts, id)
     return response, status
 
 
